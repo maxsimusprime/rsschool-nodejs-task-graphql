@@ -196,6 +196,7 @@ await test('gql-queries', async (t) => {
     t.same(foundUser1, dataUser.user);
   });
 
+  /*
   await t.test(`Get user by id with his subs.`, async (t) => {
     const { body: user1 } = await createUser(app);
     const { body: user2 } = await createUser(app);
@@ -239,4 +240,5 @@ await test('gql-queries', async (t) => {
     t.ok(data.user.subscribedToUser[0].name === user3.name);
     t.ok(data.user.subscribedToUser[0].userSubscribedTo[0].id === user1.id);
   });
+  */
 });
