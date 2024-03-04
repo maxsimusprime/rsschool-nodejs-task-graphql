@@ -11,6 +11,7 @@ import { Post, User, Profile, GraphQLMemberTypeId } from './query.js';
 import { UUIDType } from './types/uuid.js';
 import { Context } from './types/interfaces.js';
 import { PostModel, ProfileModel, UserModel } from './types/models.js';
+import { UUID } from 'crypto';
 
 export type PostDto = {
   title: string;
@@ -70,6 +71,16 @@ export const Mutation = new GraphQLObjectType({
         context: Context,
       ): Promise<PostModel> => await context.prisma.post.create({ data: args.dto }),
     },
+    deletePost: {
+      type: new GraphQLNonNull(UUIDType),
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (root, { id }: { id: UUID }, context: Context) => {
+        await context.prisma.post.delete({
+          where: { id },
+        });
+        return id;
+      },
+    },
 
     // User
     createUser: {
@@ -81,7 +92,18 @@ export const Mutation = new GraphQLObjectType({
         context: Context,
       ): Promise<UserModel> => await context.prisma.user.create({ data: args.dto }),
     },
+    deleteUser: {
+      type: new GraphQLNonNull(UUIDType),
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (root, { id }: { id: UUID }, context: Context) => {
+        await context.prisma.user.delete({
+          where: { id },
+        });
+        return id;
+      },
+    },
 
+    // Profile
     createProfile: {
       type: Profile,
       args: { dto: { type: CreateProfileInput } },
@@ -90,6 +112,16 @@ export const Mutation = new GraphQLObjectType({
         args: { dto: ProfileDto },
         context: Context,
       ): Promise<ProfileModel> => await context.prisma.profile.create({ data: args.dto }),
+    },
+    deleteProfile: {
+      type: new GraphQLNonNull(UUIDType),
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (root, { id }: { id: UUID }, context: Context) => {
+        await context.prisma.profile.delete({
+          where: { id },
+        });
+        return id;
+      },
     },
   },
 });
