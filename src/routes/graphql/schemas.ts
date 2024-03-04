@@ -1,15 +1,12 @@
-import { Static, Type } from '@fastify/type-provider-typebox';
+import { Type } from '@fastify/type-provider-typebox';
 import { PrismaClient } from '@prisma/client';
-import { PrismaClientOptions, DefaultArgs } from '@prisma/client/runtime/library.js';
 import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLFloat,
-  GraphQLID,
   GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
-  GraphQLScalarType,
   GraphQLSchema,
   GraphQLString,
 } from 'graphql';
@@ -87,6 +84,32 @@ const User = new GraphQLObjectType({
       resolve: async (root: User, args, context: Context) =>
         await context.prisma.post.findMany({
           where: { authorId: root.id },
+        }),
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(User),
+      resolve: async (root: User, args, context: Context) => 
+        await context.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: root.id,
+              },
+            },
+          },
+        }),
+    },
+    subscribedToUser: {
+      type: new GraphQLList(User),
+      resolve: async (root: User, args, context: Context) =>
+        await context.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: root.id,
+              },
+            },
+          },
         }),
     },
   }),

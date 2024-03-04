@@ -3,7 +3,7 @@ export type User = {
   name: string;
   balance: number;
   profile?: Profile;
-  posts: Post[];
+  posts?: Post[];
 };
 
 export type Profile = {
@@ -12,6 +12,7 @@ export type Profile = {
   yearOfBirth: number;
   userId: string;
   memberTypeId: 'basic' | 'business';
+  memberType?: MemberType;
 };
 
 export type Post = {
@@ -19,4 +20,10 @@ export type Post = {
   title: string;
   content: string;
   authorId: string;
+};
+
+export type MemberType = {
+  id: string;
+  discount: number;
+  postsLimitPerMonth: number;
 };

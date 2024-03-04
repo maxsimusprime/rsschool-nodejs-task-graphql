@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { DefaultArgs, PrismaClientOptions } from '@prisma/client/runtime/library.js';
 import {
   GraphQLFloat,
   GraphQLList,
@@ -11,7 +10,7 @@ import {
 import { UUIDType } from './types/uuid.js';
 
 interface Context {
-  prisma: PrismaClient<PrismaClientOptions, never, DefaultArgs>;
+  prisma: PrismaClient;
 }
 
 const User = new GraphQLObjectType({
