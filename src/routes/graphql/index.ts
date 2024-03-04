@@ -2,7 +2,7 @@ import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema, schema } from './schemas.js';
 import { graphql } from 'graphql';
 import { buildResolver } from './resolvers.js';
-import { buildResolverTest, schemaTest } from './test.js';
+import { buildResolverTest, schemaTest, resolverTest } from './test.js';
 // import depthLimit from 'graphql-depth-limit'
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -18,22 +18,33 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(req) {
-      // return await graphql({
-      //   schema: schemaTest,
-      //   source: req.body.query,
-      //   variableValues: req.body.variables,
-      //   rootValue: buildControllerTest(prisma),
-      // });
+      const { query, variables } = req.body;
       return await graphql({
         schema,
-        source: req.body.query,
-        variableValues: req.body.variables,
+        source: query,
+        variableValues: variables,
         // rootValue: buildResolver(prisma),
-        rootValue: {
-          Query: {
-            users: async () => [{ id: 'id', name: 'name', balance: 11.22 }],
-          },
-        },
+        contextValue: { prisma },
+      });
+    },
+  });
+
+  fastify.route({
+    url: '/test',
+    method: 'POST',
+    schema: {
+      ...createGqlResponseSchema,
+      response: {
+        200: gqlResponseSchema,
+      },
+    },
+    async handler(req) {
+      const { query, variables } = req.body;
+      return await graphql({
+        schema: schemaTest,
+        source: query,
+        variableValues: variables,
+        contextValue: { prisma },
       });
     },
   });
