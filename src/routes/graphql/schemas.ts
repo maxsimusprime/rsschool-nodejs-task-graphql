@@ -1,4 +1,4 @@
-import { Type } from '@fastify/type-provider-typebox';
+import { Static, Type } from '@fastify/type-provider-typebox';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientOptions, DefaultArgs } from '@prisma/client/runtime/library.js';
 import {
@@ -16,6 +16,7 @@ import {
 import { UUIDType } from './types/uuid.js';
 import { UUID } from 'crypto';
 import { MemberTypeId } from '../member-types/schemas.js';
+import type { User, Profile } from './types/models.js';
 interface Context {
   prisma: PrismaClient;
 }
@@ -51,46 +52,67 @@ const GraphQLMemberTypeId = new GraphQLEnumType({
 
 const MemberType = new GraphQLObjectType({
   name: 'MemberType',
-  fields: {
+  fields: () => ({
     id: { type: GraphQLMemberTypeId },
     discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
-  },
+  }),
 });
 
 const Post = new GraphQLObjectType({
   name: 'Post',
-  fields: {
+  fields: () => ({
     id: { type: UUIDType },
     title: { type: GraphQLString },
     content: { type: GraphQLString },
     authorId: { type: UUIDType },
-  },
+  }),
 });
 
 const User = new GraphQLObjectType({
   name: 'User',
-  fields: {
+  fields: () => ({
     id: { type: UUIDType },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
-  },
+    profile: {
+      type: Profile,
+      resolve: async (root: User, args, context: Context) =>
+        await context.prisma.profile.findUnique({
+          where: { userId: root.id },
+        }),
+    },
+    posts: {
+      type: new GraphQLList(Post),
+      resolve: async (root: User, args, context: Context) =>
+        await context.prisma.post.findMany({
+          where: { authorId: root.id },
+        }),
+    },
+  }),
 });
 
 const Profile = new GraphQLObjectType({
   name: 'Profile',
-  fields: {
+  fields: () => ({
     id: { type: UUIDType },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
     memberTypeId: { type: GraphQLMemberTypeId },
-  },
+    memberType: {
+      type: MemberType,
+      resolve: async (root: Profile, args, context: Context) =>
+        await context.prisma.memberType.findUnique({
+          where: { id: root.memberTypeId },
+        }),
+    },
+  }),
 });
 
 const Query = new GraphQLObjectType({
   name: 'Query',
-  fields: {
+  fields: () => ({
     // MemberType
     memberTypes: {
       type: new GraphQLList(MemberType),
@@ -150,7 +172,7 @@ const Query = new GraphQLObjectType({
           where: { id: args.id },
         }),
     },
-  },
+  }),
 });
 
 export const schema = new GraphQLSchema({
