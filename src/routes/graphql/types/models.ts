@@ -1,28 +1,28 @@
-export type User = {
+export type UserModel = {
   id: string;
   name: string;
   balance: number;
-  profile?: Profile;
-  posts?: Post[];
+  profile?: ProfileModel;
+  posts?: PostModel[];
 };
 
-export type Profile = {
+export type ProfileModel = {
   id: string;
   isMale: boolean;
   yearOfBirth: number;
   userId: string;
-  memberTypeId: 'basic' | 'business';
-  memberType?: MemberType;
+  memberTypeId: string;
+  memberType?: MemberTypeModel;
 };
 
-export type Post = {
+export type PostModel = {
   id: string;
   title: string;
   content: string;
   authorId: string;
 };
 
-export type MemberType = {
+export type MemberTypeModel = {
   id: string;
   discount: number;
   postsLimitPerMonth: number;

@@ -10,10 +10,10 @@ import {
 import { UUIDType } from './types/uuid.js';
 import { UUID } from 'crypto';
 import { MemberTypeId } from '../member-types/schemas.js';
-import type { User, Profile } from './types/models.js';
+import { UserModel, ProfileModel } from './types/models.js';
 import { Context } from './types/interfaces.js';
 
-const GraphQLMemberTypeId = new GraphQLEnumType({
+export const GraphQLMemberTypeId = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
     basic: { value: MemberTypeId.BASIC },
@@ -21,7 +21,7 @@ const GraphQLMemberTypeId = new GraphQLEnumType({
   },
 });
 
-const MemberType = new GraphQLObjectType({
+export const MemberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: () => ({
     id: { type: GraphQLMemberTypeId },
@@ -30,7 +30,7 @@ const MemberType = new GraphQLObjectType({
   }),
 });
 
-const Post = new GraphQLObjectType({
+export const Post = new GraphQLObjectType({
   name: 'Post',
   fields: () => ({
     id: { type: UUIDType },
@@ -40,7 +40,7 @@ const Post = new GraphQLObjectType({
   }),
 });
 
-const User = new GraphQLObjectType({
+export const User = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
     id: { type: UUIDType },
@@ -48,21 +48,21 @@ const User = new GraphQLObjectType({
     balance: { type: GraphQLFloat },
     profile: {
       type: Profile,
-      resolve: async (root: User, args, context: Context) =>
+      resolve: async (root: UserModel, args, context: Context) =>
         await context.prisma.profile.findUnique({
           where: { userId: root.id },
         }),
     },
     posts: {
       type: new GraphQLList(Post),
-      resolve: async (root: User, args, context: Context) =>
+      resolve: async (root: UserModel, args, context: Context) =>
         await context.prisma.post.findMany({
           where: { authorId: root.id },
         }),
     },
     userSubscribedTo: {
       type: new GraphQLList(User),
-      resolve: async (root: User, args, context: Context) =>
+      resolve: async (root: UserModel, args, context: Context) =>
         await context.prisma.user.findMany({
           where: {
             subscribedToUser: {
@@ -75,7 +75,7 @@ const User = new GraphQLObjectType({
     },
     subscribedToUser: {
       type: new GraphQLList(User),
-      resolve: async (root: User, args, context: Context) =>
+      resolve: async (root: UserModel, args, context: Context) =>
         await context.prisma.user.findMany({
           where: {
             userSubscribedTo: {
@@ -89,7 +89,7 @@ const User = new GraphQLObjectType({
   }),
 });
 
-const Profile = new GraphQLObjectType({
+export const Profile = new GraphQLObjectType({
   name: 'Profile',
   fields: () => ({
     id: { type: UUIDType },
@@ -99,7 +99,7 @@ const Profile = new GraphQLObjectType({
     memberTypeId: { type: GraphQLMemberTypeId },
     memberType: {
       type: MemberType,
-      resolve: async (root: Profile, args, context: Context) =>
+      resolve: async (root: ProfileModel, args, context: Context) =>
         await context.prisma.memberType.findUnique({
           where: { id: root.memberTypeId },
         }),
